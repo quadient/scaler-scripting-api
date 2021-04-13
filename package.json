@@ -1,6 +1,6 @@
 {
     "name": "@quadient/scaler-scripting-api",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "This package provides TypeScript type definitions (d.ts) for scripting in Inspire Scaler's Script module.",
     "keywords": [
         "Scaler",
@@ -17,5 +17,14 @@
     },
     "license": "MIT",
     "author": "o-su",
-    "types": "./index.d.ts"
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build-helpers": "tsc ./src/helpers.ts --declaration --strict --target es5 --outDir ./dist",
+        "copy-definitions": "cp ./src/index.d.ts ./dist/index.d.ts",
+        "build": "npm run build-helpers && npm run copy-definitions",
+        "prepack": "npm install && npm run build"
+    },
+    "devDependencies": {
+        "typescript": "*"
+    }
 }
