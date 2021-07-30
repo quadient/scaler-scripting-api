@@ -293,9 +293,8 @@ declare class JavaCharSequence {
 declare type ScString = string & JavaStringWrapper;
 declare type ScBoolean = boolean & JavaBoolean;
 declare type ScInteger = number & JavaIntegerWrapper;
-declare type ScObject = Object;
 
-declare type ScJsonMap = ScMap<any>;
+declare type ScObject = ScMap<any>;
 
 declare type ScMap<T> = {
   [key: string]: T;
@@ -338,6 +337,7 @@ declare type ScFileInfo = {
    * The file's modification timestamp (in milliseconds).
    */
   modifiedTime: JavaLong;
+  json: ScString;
 };
 
 /**
@@ -447,6 +447,7 @@ declare type ScRunwResponse = {
    * Log from the Inspire Production Server run.
    */
   ipsLog: ScString;
+  json: ScString;
 };
 
 declare enum ScRunwStatus {
@@ -477,6 +478,7 @@ declare type ScHttpResponse = {
    * HTTP response body (payload).
    */
   body: any;
+  json: ScString;
 };
 
 /**
@@ -514,6 +516,7 @@ declare type ScSqlResultObjects = {
    * Length of rows array.
    */
   length: number;
+  json: ScString;
 };
 
 /**
@@ -523,7 +526,7 @@ declare type ScSqlResultNativeObjects = {
   /**
    * Java array of row objects (column values).
    */
-  objects: ScJsonMap[];
+  objects: ScObject[];
   /**
    * Flags the existence of additional rows in the results. By default, it is limited to 500 rows.
    */
@@ -536,6 +539,7 @@ declare type ScSqlResultNativeObjects = {
    * Length of rows array.
    */
   length: number;
+  json: ScString;
 };
 
 /**
@@ -558,6 +562,7 @@ declare type ScSqlResult = {
    * Length of rows array.
    */
   length: number;
+  json: ScString;
 };
 
 /**
@@ -571,7 +576,7 @@ declare type ScInteractiveResponse = {
   /**
    * Object with the content of Inspire Interactive response body. If the request fails, body is null.The property type (subtree or array) returned in this body depends on the number of returned objects.
    */
-  body: ScJsonMap;
+  body: ScObject;
   /**
    * Indicates whether the request has been successful.
    */
@@ -658,7 +663,23 @@ declare enum ScEnvironmentVariableType {
   Password = "Password",
 }
 
-declare type ScVarReference = {
+declare type ScVariableReference = {
+  /**
+   * Accesses an ScVariableSubtreeReference field and returns an item at a given index.
+   */
+  get(index: number | ScInteger): ScVariableSubtreeReference;
+  forEach(action: (element: ScVariableSubtreeReference) => void): void;
+  /**
+   * The number of items in the array (Java practice).
+   */
+  size: ScInteger;
+  /**
+   * The number of items in the array (JavaScript practice).
+   */
+  length: ScInteger;
+};
+
+declare type ScVariableSubtreeReference = {
   /**
    * Gets the value of a given String variable within the context of a Subtree variable. The read value is stored within the memory, therefore it is recommended to use this function for small values (e.g. a few MB). For larger files, you should use getvarStream instead.
    */
@@ -673,7 +694,7 @@ declare type ScVarReference = {
   /**
    * Gets the value of a given variable as a Subtree (JavaScript object) within the context of a parent Subtree variable.The read value is stored within the memory, therefore it is recommended to use this function for small values (e.g. a few MB).
    */
-  getvarSubtree(name: string | JavaStringWrapper): ScJsonMap;
+  getvarSubtree(name: string | JavaStringWrapper): ScObject;
   /**
    * Gets the value of a given variable as a stream of bytes within the context of a Subtree variable. The value is not read but it references an input stream that should be consumed by other stream-based functions (e.g. fs.writeStream). You should always close the stream when you are finished with it.
    */
@@ -690,18 +711,6 @@ declare type ScVarReference = {
    * Sets the value of a given job variable using the ByteArray Java class within the context of a Subtree variable. The set value can be used by any subsequent workflow module.
    */
   setvarBytes(name: string | JavaStringWrapper, value: JavaByte[]): void;
-  /**
-   * Accesses an ArrayReference field and returns an item at a given index.
-   */
-  get(index: number | ScInteger): ScVarReference;
-  /**
-   * The number of items in the array (Java practice).
-   */
-  size: ScInteger;
-  /**
-   * The number of items in the array (JavaScript practice).
-   */
-  length: ScInteger;
 };
 
 /**
@@ -743,7 +752,7 @@ declare type ScIcmFileInfo = {
   /**
    * Item metadata
    */
-  metadata: ScJsonMap;
+  metadata: ScObject;
 };
 
 /**
@@ -864,12 +873,12 @@ declare function getvarStream(
 /**
  * Gets the value of a given variable as an Array (JavaScript Array). The read value is stored within the memory thus it is recommended to use this declare function for small values (up to a few MB). For larger files, you should use getvarArrayReferences() instead. The variable you are getting must be defined in Custom Variable Manager and be initialized. If you intend to serialize (convert to String) a field from the returned Array, you should use the toString() method of this field. The Array.isArray() JavaScript method  is working incorrectly with nested Arrays. The elements of the Array you wish to get are of the Subtree type (JavaScript Object).
  */
-declare function getvarArray(name: string | JavaStringWrapper): any[];
+declare function getvarArray(name: string | JavaStringWrapper): ScObject[];
 
 /**
  * Gets the value of a given variable as a Subtree (JavaScript Object). The read value is stored within the memory thus it is recommended to use this declare function for small values (up to a few MB). If you intend to serialize (convert to String) the returned object, you should use the toString() method of this object. The variable you are getting must be defined in Custom Variable Manager and be initialized.
  */
-declare function getvarSubtree(name: string | JavaStringWrapper): ScJsonMap;
+declare function getvarSubtree(name: string | JavaStringWrapper): ScObject;
 
 /**
  * Sets the value of a given job variable as a String. The variable must be defined in Custom Variable Manager.
@@ -884,7 +893,7 @@ declare function setvar(
  */
 declare function setvarArray(
   name: string | JavaStringWrapper,
-  value: ScJsonMap
+  value: ScObject
 ): void;
 
 /**
@@ -905,7 +914,7 @@ declare function isvar(name: string | JavaStringWrapper): ScBoolean;
  */
 declare function getvarArrayReferences(
   name: string | JavaStringWrapper
-): ScVarReference[];
+): ScVariableReference[];
 
 /**
  * Sets the value of a given job variable using the InputStream Java class. The set variable's value can be used by any subsequent workflow module. The variable must be defined in Custom Variable Manager.
@@ -922,6 +931,11 @@ declare function setvarBytes(
   name: string | JavaStringWrapper,
   value: JavaByte[]
 ): void;
+
+/**
+ * Gets the name of the Script module that calls this function.
+ */
+declare function getScriptModuleName(): ScString;
 
 /**
  * API for Base64 encoding/decoding.
@@ -1016,7 +1030,7 @@ declare class env {
   /**
    * This method can only be invoked from within the System Processes workflows and when the cluster quorum is healthy. Otherwise, the job fails. It returns a map in which the given Environment variables are used as keys, and their values are the Arrays of workflow names in which the given Environment variable is used. This method provides a better performance than the getUsage method when iterating.
    */
-  static getUsages(envVars: string | JavaStringWrapper[]): ScJsonMap;
+  static getUsages(envVars: string | JavaStringWrapper[]): ScObject;
 
   /**
    * This method can only be invoked from within the System Processes workflows. It lists all the Environment variables that exist in Inspire Scaler.
@@ -1173,7 +1187,7 @@ declare class fs {
 /**
  * Packages is a pre-defined, top-level object with no properties. It allows you to access Java packages and classes using their fully qualified names, as if they were the properties of the Packages object.
  */
-declare class Packages {}
+declare class Packages { }
 
 /**
  * API for making HTTP requests. Note that you can use this API for both HTTP and HTTPS. If requesting a resource on HTTPS endpoint, all domains and certificates are considered as trusted.
@@ -1300,14 +1314,14 @@ declare class icm {
   /**
    * Retrieves the metadata about the file or folder located at the given location. It returns a map whose keys represent the metadata of an ICM file or folder. Values of all properties are of the string array type.
    */
-  static getMetadata(path: string | JavaStringWrapper): ScJsonMap;
+  static getMetadata(path: string | JavaStringWrapper): ScObject;
 
   /**
    * Updates the metadata of a file or folder located at the given location. It returns true if the operation succeeds.
    */
   static setMetadata(
     path: string | JavaStringWrapper,
-    metadata: any,
+    metadata: ScObject,
     merge: boolean | JavaBoolean
   ): ScBoolean;
 
@@ -1459,6 +1473,7 @@ declare class Java {
    * Converts a Java array into its JavaScript counterpart.
    */
   static from(value: JavaArray): ScObject[];
+  static to<T, R>(value: Array<T>, type?: string): R;
 }
 
 /**
@@ -1765,7 +1780,8 @@ declare class workflows {
    */
   static markVersionForDeploy(
     workflowName: string | JavaStringWrapper,
-    version: number | JavaIntegerWrapper
+    version: number | JavaIntegerWrapper,
+    workflowPath?: string | JavaStringWrapper
   ): ScBoolean;
 
   /**
@@ -1799,8 +1815,9 @@ declare class workflows {
 declare class xml {
   /**
    * Converts XML structures into JSON strings. Converting XML files containing CDATA is not supported. The conversion keeps namespaces. Textual content within elements with attributes is converted into a content property. If you attempt to convert a regular string (not XML), an empty object is returned.
+   * @param keepStrings If the value of the 'keepStrings' argument is set to 'true', string values are not converted to boolean or numeric values. They remain strings.
    */
-  static toJson(xml: string | JavaStringWrapper): ScString;
+  static toJson(xml: string | JavaStringWrapper, keepStrings?: ScBoolean): ScString;
 
   /**
    * Converts JSON strings into XML structures. The conversion ignores empty JSON fields.
