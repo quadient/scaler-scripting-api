@@ -1317,12 +1317,26 @@ declare class icm {
   static getMetadata(path: string | JavaStringWrapper): ScObject;
 
   /**
+   * Retrieves the metadata about the file or folder located at the given location. It returns a map whose keys represent the metadata of an ICM file or folder. Values of properties are of the property array type.
+   */
+  static getTypedMetadata(path: string | JavaStringWrapper): ScObject;
+
+  /**
    * Updates the metadata of a file or folder located at the given location. It returns true if the operation succeeds.
    */
   static setMetadata(
     path: string | JavaStringWrapper,
     metadata: ScObject,
     merge: boolean | JavaBoolean
+  ): ScBoolean;
+
+  /**
+   * Updates the metadata of a file or folder located at the given location. It returns true if the operation succeeds.
+   */
+  static setTypedMetadata(
+      path: string | JavaStringWrapper,
+      metadata: ScObject,
+      merge: boolean | JavaBoolean
   ): ScBoolean;
 
   /**
