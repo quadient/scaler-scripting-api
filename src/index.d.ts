@@ -854,6 +854,20 @@ declare type ScServerLogger = {
 };
 
 /**
+ * An object for working with a specific access token.
+ */
+declare type ScAccessToken = {
+  /**
+   * Returns the value of the given access token.
+   */
+  value: ScString;
+  /**
+   * Returns the domain that was defined for the given access token via the 'Issued for' setting in the token's Scaler configuration.
+   */
+  issuedFor: ScString;
+}
+
+/**
  * Gets the value of a given variable as a String. The read value is stored within the memory thus it is recommended to use this declare function for small values (up to a few MB). For larger files, you should use getvarStream instead. The variable you are getting must be defined in Custom Variable Manager and be initialized.
  */
 declare function getvar(name: string | JavaStringWrapper): ScString;
@@ -1837,4 +1851,14 @@ declare class xml {
    * Converts JSON strings into XML structures. The conversion ignores empty JSON fields.
    */
   static fromJson(json: string | JavaStringWrapper): ScString;
+}
+
+/**
+ * API for working with access tokens.
+ */
+declare class accesstokens {
+  /**
+   * Returns an object for working with a specific access token.
+   */
+  static getAccessToken(alias: string | JavaStringWrapper): ScAccessToken
 }
