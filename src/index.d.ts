@@ -1318,6 +1318,14 @@ declare class http {
  */
 declare class icm {
   /**
+   * Coppies a file or folder to a different location.
+   */
+  static copy(
+      fromPath: string | JavaStringWrapper,
+      toPath: string | JavaStringWrapper
+  ): ScBoolean;
+
+  /**
    * Retrieves information about the files or folders located at the given location. It returns a Java array.
    */
   static list(
