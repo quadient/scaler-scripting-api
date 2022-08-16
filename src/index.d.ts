@@ -1318,7 +1318,7 @@ declare class http {
  */
 declare class icm {
   /**
-   * Coppies a file or folder to a different location.
+   * Copies a given source to a given target. It involves files as well as complete directories.
    */
   static copy(
       fromPath: string | JavaStringWrapper,
